@@ -116,6 +116,8 @@
     <ClInclude Include="src\Gameplay\Components\MaterialSwapBehaviour.h" />
     <ClInclude Include="src\Gameplay\Components\RenderComponent.h" />
     <ClInclude Include="src\Gameplay\Components\RotatingBehaviour.h" />
+    <ClInclude Include="src\Gameplay\Components\ScoreBehaviour.h" />
+    <ClInclude Include="src\Gameplay\Components\TriggerVolumeEnterBehaviour.h" />
     <ClInclude Include="src\Gameplay\GameObject.h" />
     <ClInclude Include="src\Gameplay\Light.h" />
     <ClInclude Include="src\Gameplay\Material.h" />
@@ -165,6 +167,8 @@
     <ClCompile Include="src\Gameplay\Components\MaterialSwapBehaviour.cpp" />
     <ClCompile Include="src\Gameplay\Components\RenderComponent.cpp" />
     <ClCompile Include="src\Gameplay\Components\RotatingBehaviour.cpp" />
+    <ClCompile Include="src\Gameplay\Components\ScoreBehaviour.cpp" />
+    <ClCompile Include="src\Gameplay\Components\TriggerVolumeEnterBehaviour.cpp" />
     <ClCompile Include="src\Gameplay\GameObject.cpp" />
     <ClCompile Include="src\Gameplay\Material.cpp" />
     <ClCompile Include="src\Gameplay\MeshResource.cpp" />

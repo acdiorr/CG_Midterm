@@ -18,6 +18,7 @@ namespace Gameplay::Physics {
 		_mass(1.0f),
 		_isMassDirty(true),
 		_body(nullptr),
+		_velocityOverride(0.0f, 0.0f, 0.0f),
 		_motionState(nullptr),
 		_linearDamping(0.0f),
 		_angularDamping(0.005f),
@@ -34,6 +35,17 @@ namespace Gameplay::Physics {
 			delete _body;
 			_colliders.clear();
 		}
+	}
+
+	void RigidBody::SetVelocity(glm::vec3 value)
+	{
+		_velocityOverride = value;
+		if (_body != nullptr) { _body->setLinearVelocity(ToBt(value)); }
+	}
+
+	glm::vec3 RigidBody::GetVelocity() const
+	{
+		return ToGlm(_body->getLinearVelocity());
 	}
 
 	void RigidBody::SetMass(float value) {

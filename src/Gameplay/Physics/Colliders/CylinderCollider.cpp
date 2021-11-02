@@ -1,4 +1,5 @@
 #include "CylinderCollider.h"
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include "Utils/ImGuiHelper.h"
 #include "Utils/JsonGlmHelpers.h"

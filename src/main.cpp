@@ -50,6 +50,7 @@
 #include "Gameplay/Components/JumpBehaviour.h"
 #include "Gameplay/Components/RenderComponent.h"
 #include "Gameplay/Components/MaterialSwapBehaviour.h"
+#include "Gameplay/Components/ScoreBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -57,6 +58,7 @@
 #include "Gameplay/Physics/Colliders/PlaneCollider.h"
 #include "Gameplay/Physics/Colliders/SphereCollider.h"
 #include "Gameplay/Physics/Colliders/ConvexMeshCollider.h"
+#include "Gameplay/Physics/Colliders/CylinderCollider.h"
 #include "Gameplay/Physics/TriggerVolume.h"
 #include "Graphics/DebugDraw.h"
 
@@ -254,6 +256,7 @@ int main() {
 	ComponentManager::RegisterType<RotatingBehaviour>();
 	ComponentManager::RegisterType<JumpBehaviour>();
 	ComponentManager::RegisterType<MaterialSwapBehaviour>();
+	ComponentManager::RegisterType<ScoreBehaviour>();
 
 	// GL states, we'll enable depth testing and backface fulling
 	glEnable(GL_DEPTH_TEST);
@@ -359,8 +362,11 @@ int main() {
 			renderer->SetMesh(planeMesh);
 			renderer->SetMaterial(boxMaterial);
 
-			// This object is a renderable only, it doesn't have any behaviours or
-			// physics bodies attached!
+			// Add rigid body and then colliders
+			RigidBody::Sptr physics = square->Add<RigidBody>(RigidBodyType::Dynamic);
+			physics->AddCollider(CylinderCollider::Create());
+			
+
 		}
 
 		GameObject::Sptr monkey1 = scene->CreateGameObject("Monkey 1");
@@ -378,20 +384,20 @@ int main() {
 
 			// Add a dynamic rigid body to this monkey
 			RigidBody::Sptr physics = monkey1->Add<RigidBody>(RigidBodyType::Dynamic);
-			physics->AddCollider(ConvexMeshCollider::Create());
+			physics->AddCollider(CylinderCollider::Create());
 
 
 			// We'll add a behaviour that will interact with our trigger volumes
-			MaterialSwapBehaviour::Sptr triggerInteraction = monkey1->Add<MaterialSwapBehaviour>();
+			ScoreBehaviour::Sptr triggerInteraction = monkey1->Add<ScoreBehaviour>();
 			triggerInteraction->EnterMaterial = boxMaterial;
 			triggerInteraction->ExitMaterial = monkeyMaterial;
 		}
 
-		GameObject::Sptr monkey2 = scene->CreateGameObject("Complex Object");
+		GameObject::Sptr monkey2 = scene->CreateGameObject("Monkey 2");
 		{
 			// Set and rotation position in the scene
 			monkey2->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
-			monkey2->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+			//monkey2->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
 
 			// Add a render component
 			RenderComponent::Sptr renderer = monkey2->Add<RenderComponent>();
@@ -399,21 +405,30 @@ int main() {
 			renderer->SetMaterial(boxMaterial);
 
 			// This is an example of attaching a component and setting some parameters
-			RotatingBehaviour::Sptr behaviour = monkey2->Add<RotatingBehaviour>();
-			behaviour->RotationSpeed = glm::vec3(0.0f, 0.0f, -90.0f);
+			//RotatingBehaviour::Sptr behaviour = monkey2->Add<RotatingBehaviour>();
+			//behaviour->RotationSpeed = glm::vec3(0.0f, 0.0f, -90.0f);
 		}
 
 		// Kinematic rigid bodies are those controlled by some outside controller
 		// and ONLY collide with dynamic objects
-		RigidBody::Sptr physics = monkey2->Add<RigidBody>(RigidBodyType::Kinematic);
-		physics->AddCollider(ConvexMeshCollider::Create());
+		RigidBody::Sptr physics = monkey2->Add<RigidBody>(RigidBodyType::Dynamic);
+		physics->AddCollider(CylinderCollider::Create());
 
 		// Create a trigger volume for testing how we can detect collisions with objects!
-		GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
+
+		// Create 2 goal posts with 2 triggers here
+		GameObject::Sptr player1Goal = scene->CreateGameObject("P1Trigger");
 		{
-			TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
+			TriggerVolume::Sptr volume = player1Goal->Add<TriggerVolume>();
 			BoxCollider::Sptr collider = BoxCollider::Create(glm::vec3(3.0f, 3.0f, 1.0f));
-			collider->SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));
+			collider->SetPosition(glm::vec3(13.0f, 0.0f, 0.5f));
+			volume->AddCollider(collider);
+		}
+		GameObject::Sptr player2Goal = scene->CreateGameObject("P2Trigger");
+		{
+			TriggerVolume::Sptr volume = player2Goal->Add<TriggerVolume>();
+			BoxCollider::Sptr collider = BoxCollider::Create(glm::vec3(3.0f, 3.0f, 1.0f));
+			collider->SetPosition(glm::vec3(-12.5f, 0.0f, 0.5f));
 			volume->AddCollider(collider);
 		}
 
@@ -446,8 +461,8 @@ int main() {
 	nlohmann::json editorSceneState;
 
 	bool isMoving = false;
-	glm::vec3 transX = glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 transY = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 transX = glm::vec3(0.05f, 0.0f, 0.0f);
+	glm::vec3 transY = glm::vec3(0.0f, 0.05f, 0.0f);
 
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
@@ -538,16 +553,48 @@ int main() {
 			ImGui::Separator();
 		}
 
-		// grab game objects to setposition aka move em around
+		// Grab game objects by Name to manipulate them
+		GameObject::Sptr player1 = scene->FindObjectByName("Monkey 1");
+		GameObject::Sptr player2 = scene->FindObjectByName("Monkey 2");
+		//GameObject* monkeyTest = monkey->GetPosition();
 
-		/*
-		GameObject::Sptr monkey = scene->FindObjectByName("Monkey 1");
-		GameObject* monkeyTest = 
+		// Player 1 Movement
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			player1->SetPostion(player1->GetPosition() - transX);
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			player1->SetPostion(player1->GetPosition() + transX);
+		}
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			player1->SetPostion(player1->GetPosition() - transY);
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			player1->SetPostion(player1->GetPosition() + transY);
+		}
+
+		// Player 2 Movement
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		{
+			player2->SetPostion(player2->GetPosition() - transX);
+		}
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		{
+			player2->SetPostion(player2->GetPosition() + transX);
+		}
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		{
-			monkey->SetPostion(monkey->GetPosition() - transX);
+			player2->SetPostion(player2->GetPosition() - transY);
 		}
-		*/
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		{
+			player2->SetPostion(player2->GetPosition() + transY);
+		}
+
+
 		dt *= playbackSpeed;
 
 		// Perform updates for all components

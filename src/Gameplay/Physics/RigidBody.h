@@ -35,6 +35,10 @@ namespace Gameplay::Physics {
 		RigidBody(RigidBodyType type = RigidBodyType::Static);
 		virtual ~RigidBody();
 
+		void SetVelocity(glm::vec3 value);
+
+		glm::vec3 GetVelocity() const;
+
 		/// <summary>
 		/// Sets the mass for this object in KG
 		/// </summary>
@@ -157,6 +161,8 @@ namespace Gameplay::Physics {
 		btMotionState*   _motionState;
 		btVector3        _inertia;
 
+		// Change the velocity
+		glm::vec3		  _velocityOverride;
 		// Handles resolving any dirty state stuff for our object
 		void _HandleStateDirty();
 
