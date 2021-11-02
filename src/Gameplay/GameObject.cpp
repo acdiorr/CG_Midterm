@@ -26,7 +26,7 @@ namespace Gameplay {
 	{ }
 
 	void GameObject::LookAt(const glm::vec3& point) {
-		glm::mat3 rot = glm::lookAt(_position, point, glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat3 rot = glm::lookAt(_position, point, glm::vec3(0.0f, -1.0f, 0.0f));
 		SetRotation(glm::quat(rot));
 	}
 

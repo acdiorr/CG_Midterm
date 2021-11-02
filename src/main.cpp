@@ -97,9 +97,9 @@ void GlDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsi
 // Stores our GLFW window in a global variable for now
 GLFWwindow* window;
 // The current size of our window in pixels
-glm::ivec2 windowSize = glm::ivec2(800, 800);
+glm::ivec2 windowSize = glm::ivec2(1200, 800);
 // The title of our GLFW window
-std::string windowTitle = "INFR-1350U";
+std::string windowTitle = "Air Hockey GAME WOW";
 
 // using namespace should generally be avoided, and if used, make sure it's ONLY in cpp files
 using namespace Gameplay;
@@ -204,6 +204,20 @@ bool DrawLightImGui(const Scene::Sptr& scene, const char* title, int ix) {
 	return result;
 }
 
+GLfloat tranX = 0.0f;
+GLfloat tranY = 0.0f;
+
+void keyboard() {
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		tranX += 0.5f;
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		tranX -= 0.5f;
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		tranY += 0.01f;
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		tranY -= 0.01f;
+
+}
 int main() {
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
@@ -308,11 +322,11 @@ int main() {
 		// Set up the scene's camera
 		GameObject::Sptr camera = scene->CreateGameObject("Main Camera");
 		{
-			camera->SetPostion(glm::vec3(0, 4, 4));
+			camera->SetPostion(glm::vec3(0.0f, 0.0f, 7.0f));
 			camera->LookAt(glm::vec3(0.0f));
 
 			Camera::Sptr cam = camera->Add<Camera>();
-
+			
 			// Make sure that the camera is set as the scene's main camera!
 			scene->MainCamera = cam;
 		}
@@ -321,7 +335,7 @@ int main() {
 		GameObject::Sptr plane = scene->CreateGameObject("Plane");
 		{
 			// Scale up the plane
-			plane->SetScale(glm::vec3(10.0F));
+			plane->SetScale(glm::vec3(20.0f, 11.0f, 10.f));
 
 			// Create and attach a RenderComponent to the object to draw our mesh
 			RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
@@ -431,6 +445,10 @@ int main() {
 
 	nlohmann::json editorSceneState;
 
+	bool isMoving = false;
+	glm::vec3 transX = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 transY = glm::vec3(0.0f, 1.0f, 0.0f);
+
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -439,6 +457,8 @@ int main() {
 		// Calculate the time since our last frame (dt)
 		double thisFrame = glfwGetTime();
 		float dt = static_cast<float>(thisFrame - lastFrame);
+
+		keyboard();
 
 		// Showcasing how to use the imGui library!
 		bool isDebugWindowOpen = ImGui::Begin("Debugging");
@@ -518,6 +538,16 @@ int main() {
 			ImGui::Separator();
 		}
 
+		// grab game objects to setposition aka move em around
+
+		/*
+		GameObject::Sptr monkey = scene->FindObjectByName("Monkey 1");
+		GameObject* monkeyTest = 
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		{
+			monkey->SetPostion(monkey->GetPosition() - transX);
+		}
+		*/
 		dt *= playbackSpeed;
 
 		// Perform updates for all components
