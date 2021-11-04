@@ -346,7 +346,7 @@ int main() {
 			renderer->SetMaterial(boxMaterial);
 
 			// Attach a plane collider that extends infinitely along the X/Y axis
-			RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
+			RigidBody::Sptr physics = plane->Add<RigidBody>(RigidBodyType::Static);
 			physics->AddCollider(PlaneCollider::Create());
 		}
 
@@ -366,7 +366,6 @@ int main() {
 			RigidBody::Sptr physics = square->Add<RigidBody>(RigidBodyType::Dynamic);
 			physics->AddCollider(CylinderCollider::Create());
 			
-
 		}
 
 		GameObject::Sptr monkey1 = scene->CreateGameObject("Monkey 1");
@@ -375,7 +374,7 @@ int main() {
 			monkey1->SetPostion(glm::vec3(1.5f, 0.0f, 1.0f));
 
 			// Add some behaviour that relies on the physics body
-			monkey1->Add<JumpBehaviour>();
+			//monkey1->Add<JumpBehaviour>();
 
 			// Create and attach a renderer for the monkey
 			RenderComponent::Sptr renderer = monkey1->Add<RenderComponent>();
@@ -385,7 +384,8 @@ int main() {
 			// Add a dynamic rigid body to this monkey
 			RigidBody::Sptr physics = monkey1->Add<RigidBody>(RigidBodyType::Dynamic);
 			physics->AddCollider(CylinderCollider::Create());
-
+			//glm::vec3(0.5f, 0.5f, 0.5f)))->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f)
+			physics->SetAngularDamping(0.0f);
 
 			// We'll add a behaviour that will interact with our trigger volumes
 			ScoreBehaviour::Sptr triggerInteraction = monkey1->Add<ScoreBehaviour>();
@@ -413,7 +413,7 @@ int main() {
 		// and ONLY collide with dynamic objects
 		RigidBody::Sptr physics = monkey2->Add<RigidBody>(RigidBodyType::Dynamic);
 		physics->AddCollider(CylinderCollider::Create());
-
+		physics->SetAngularDamping(0.0f);
 		// Create a trigger volume for testing how we can detect collisions with objects!
 
 		// Create 2 goal posts with 2 triggers here
@@ -461,8 +461,8 @@ int main() {
 	nlohmann::json editorSceneState;
 
 	bool isMoving = false;
-	glm::vec3 transX = glm::vec3(0.05f, 0.0f, 0.0f);
-	glm::vec3 transY = glm::vec3(0.0f, 0.05f, 0.0f);
+	glm::vec3 transX = glm::vec3(0.1f, 0.0f, 0.0f);
+	glm::vec3 transY = glm::vec3(0.0f, 0.1f, 0.0f);
 
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
@@ -556,44 +556,32 @@ int main() {
 		// Grab game objects by Name to manipulate them
 		GameObject::Sptr player1 = scene->FindObjectByName("Monkey 1");
 		GameObject::Sptr player2 = scene->FindObjectByName("Monkey 2");
-		//GameObject* monkeyTest = monkey->GetPosition();
 
 		// Player 1 Movement
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		{
-			player1->SetPostion(player1->GetPosition() - transX);
+			player1->Get<RigidBody>()->SetVelocity(glm::vec3(-5.0f, 0.0f, 0.0f));
 		}
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		{
-			player1->SetPostion(player1->GetPosition() + transX);
+			player1->Get<RigidBody>()->SetVelocity(glm::vec3(5.0f, 0.0f, 0.0f));
 		}
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		{
-			player1->SetPostion(player1->GetPosition() - transY);
+			player1->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, -5.0f, 0.0f));
 		}
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		{
-			player1->SetPostion(player1->GetPosition() + transY);
+			player1->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, 5.0f, 0.0f));
 		}
 
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
 		// Player 2 Movement
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		{
-			player2->SetPostion(player2->GetPosition() - transX);
+			player2->Get<RigidBody>()->SetVelocity(glm::vec3(xpos, ypos, 0.0f));
 		}
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		{
-			player2->SetPostion(player2->GetPosition() + transX);
-		}
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		{
-			player2->SetPostion(player2->GetPosition() - transY);
-		}
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		{
-			player2->SetPostion(player2->GetPosition() + transY);
-		}
-
 
 		dt *= playbackSpeed;
 
