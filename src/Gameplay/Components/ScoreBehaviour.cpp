@@ -11,20 +11,37 @@ ScoreBehaviour::ScoreBehaviour() :
 ScoreBehaviour::~ScoreBehaviour() = default;
 
 void ScoreBehaviour::OnEnteredTrigger(const Gameplay::Physics::TriggerVolume::Sptr& trigger) {
-	if (_renderer && EnterMaterial) {
-		_renderer->SetMaterial(EnterMaterial);
+	if (trigger->GetGameObject()->Name == "P1Trigger") {
+
 		GetGameObject()->SetPostion(glm::vec3(0.0f, 0.0f, 2.0f));
-		
-		std::cout << "Score +1";
+		score2++; //Player 2 Scored
+		LOG_INFO("+1 for Player 2", trigger->GetGameObject()->Name);
+
+		if (score2 == 3)
+		{
+			std::cout << "Game Over! Player 2 Wins!";
+			exit(0);
+		}
 	}
-	LOG_INFO("Entered trigger: {}", trigger->GetGameObject()->Name);
+	if (trigger->GetGameObject()->Name == "P2Trigger") {
+
+		GetGameObject()->SetPostion(glm::vec3(0.0f, 0.0f, 2.0f));
+		score1++; //Player 1 Scored
+		LOG_INFO("+1 for Player 1", trigger->GetGameObject()->Name);
+
+		if (score1 == 3)
+		{
+			std::cout << "Game Over! Player 1 Wins!";
+			exit(0);
+		}
+	}
 }
 
 void ScoreBehaviour::OnLeavingTrigger(const Gameplay::Physics::TriggerVolume::Sptr& trigger) {
 	if (_renderer && ExitMaterial) {
 		_renderer->SetMaterial(ExitMaterial);
 	}
-	LOG_INFO("Left trigger: {}", trigger->GetGameObject()->Name);
+	LOG_INFO("Exitting Trigger {}", trigger->GetGameObject()->Name);
 }
 
 void ScoreBehaviour::Awake() {

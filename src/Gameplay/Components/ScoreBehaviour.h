@@ -25,4 +25,6 @@ public:
 
 protected:
 	RenderComponent::Sptr _renderer;
+	int score1 = 0;
+	int score2 = 0;
 };
