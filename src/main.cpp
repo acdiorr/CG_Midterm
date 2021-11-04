@@ -412,6 +412,7 @@ int main() {
 			paddleLeft->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
 			// Add some behaviour that relies on the physics body
 			//monkey1->Add<JumpBehaviour>();
+			int p1Score = 0;
 
 			// Create and attach a renderer for the monkey
 			RenderComponent::Sptr renderer = paddleLeft->Add<RenderComponent>();
@@ -420,14 +421,13 @@ int main() {
 
 			// Add a dynamic rigid body to this monkey
 			RigidBody::Sptr physics = paddleLeft->Add<RigidBody>(RigidBodyType::Dynamic);
-			physics->AddCollider(CylinderCollider::Create())-> SetRotation(glm::vec3(90.0f, 0.f,0.f));
+			physics->AddCollider(CylinderCollider::Create())->SetRotation(glm::vec3(90.0f, 0.f, 0.f))->SetScale(glm::vec3(2.0f, 2.0f, 0.5f));
 
 			// We'll add a behaviour that will interact with our trigger volumes
-			/*
+			
 			ScoreBehaviour::Sptr triggerInteraction = paddleLeft->Add<ScoreBehaviour>();
 			triggerInteraction->EnterMaterial = boxMaterial;
 			triggerInteraction->ExitMaterial = puckMaterial;
-			*/
 		}
 		
 		GameObject::Sptr paddleRight = scene->CreateGameObject("Paddle2");
@@ -438,18 +438,24 @@ int main() {
 
 			// Add some behaviour that relies on the physics body
 			//monkey1->Add<JumpBehaviour>();
-
+			int p2Score = 0;
 			// Create and attach a renderer for the monkey
 			RenderComponent::Sptr renderer = paddleRight->Add<RenderComponent>();
 			renderer->SetMesh(paddleMesh);
 			renderer->SetMaterial(purplepaddleMaterial);
 		}
+		RigidBody::Sptr physics = paddleRight->Add<RigidBody>(RigidBodyType::Dynamic);
+		physics->AddCollider(CylinderCollider::Create())->SetRotation(glm::vec3(90.0f, 0.f, 0.f))-> SetScale(glm::vec3(2.0f, 2.0f, 1.f))->SetScale(glm::vec3(2.0f, 2.0f, 0.5f));
+
+		//paddleRight->Get<RigidBody>()->GetComponent(Collider)->SetScale(glm::vec3(1.f, 1.f, 0.f));
+
+
 		GameObject::Sptr top = scene->CreateGameObject("Top");
 		{
 			// Set position in the scene
-			top->SetPostion(glm::vec3(0.0f, -4.5f, 2.0f));
+			top->SetPostion(glm::vec3(0.0f, -5.f, 0.5f));
 			// Scale down the plane
-			top->SetScale(glm::vec3(7.5, 0.75f/2, 0.5f/2));
+			top->SetScale(glm::vec3(7.5, 0.75f/2, 0.45f));
 
 			
 			// Create and attach a render component
@@ -460,14 +466,14 @@ int main() {
 			// Add rigid body and then colliders
 			RigidBody::Sptr physics = top->Add<RigidBody>(/*static by default*/);
 			physics->AddCollider(BoxCollider::Create())->SetScale(glm::vec3(7.5, 0.75f / 2, 1.5f));
-
+	
 		}
 		GameObject::Sptr bottom = scene->CreateGameObject("Bottom");
 		{
 			// Set position in the scene
-			bottom->SetPostion(glm::vec3(0.0f, 4.5f, 2.0f));
+			bottom->SetPostion(glm::vec3(0.0f,5.f, 0.5f));
 			// Scale down the plane
-			bottom->SetScale(glm::vec3(7.5, 0.75f / 2, 0.5f / 2));
+			bottom->SetScale(glm::vec3(7.5, 0.75f / 2, 0.45f));
 
 
 			// Create and attach a render component
@@ -477,14 +483,82 @@ int main() {
 
 			// Add rigid body and then colliders
 			RigidBody::Sptr physics = bottom->Add<RigidBody>(/*static by default*/);
-			physics->AddCollider(BoxCollider::Create())->SetScale(glm::vec3(7.5, 0.75f / 2, 0.5f / 2));
+			physics->AddCollider(BoxCollider::Create())->SetScale(glm::vec3(7.5, 0.75f / 2, 1.5f));
+
 
 		}
 
 
+		GameObject::Sptr leftT = scene->CreateGameObject("Left-T");
+		{
+			// Set position in the scene
+			leftT->SetPostion(glm::vec3(7.7f, -3.68f, 0.5f));
+			// Scale down the plane
+			leftT->SetScale(glm::vec3(0.25, 1.7, 0.45f));
 
-		RigidBody::Sptr physics = paddleRight->Add<RigidBody>(RigidBodyType::Dynamic);
-		physics->AddCollider(CylinderCollider::Create())->SetRotation(glm::vec3(90.0f, 0.f, 0.f));
+			// Create and attach a render component
+			RenderComponent::Sptr renderer = leftT->Add<RenderComponent>();
+			renderer->SetMesh(cubeMesh);
+			renderer->SetMaterial(cubeMaterial);
+
+			// Add rigid body and then colliders
+			RigidBody::Sptr physics = leftT->Add<RigidBody>(/*static by default*/);
+			physics->AddCollider(BoxCollider::Create())->SetScale(glm::vec3(0.25, 1, 1.5));
+		}
+
+		GameObject::Sptr leftB = scene->CreateGameObject("Left-B");
+		{
+			// Set position in the scene
+			leftB->SetPostion(glm::vec3(7.7f, 3.68f, 0.5f));
+			// Scale down the plane
+			leftB->SetScale(glm::vec3(0.25, 1.7, 0.45));
+
+			// Create and attach a render component
+			RenderComponent::Sptr renderer = leftB->Add<RenderComponent>();
+			renderer->SetMesh(cubeMesh);
+			renderer->SetMaterial(cubeMaterial);
+
+			// Add rigid body and then colliders
+			RigidBody::Sptr physics = leftB->Add<RigidBody>(/*static by default*/);
+			physics->AddCollider(BoxCollider::Create())->SetScale(glm::vec3(0.25, 1, 1.5));
+		}
+
+		GameObject::Sptr rightT = scene->CreateGameObject("Right-T");
+		{
+			// Set position in the scene
+			rightT->SetPostion(glm::vec3(-7.7f, -3.68f, 0.5f));
+			// Scale down the plane
+			rightT->SetScale(glm::vec3(0.25, 1.7, 0.45f));
+
+			// Create and attach a render component
+			RenderComponent::Sptr renderer = rightT->Add<RenderComponent>();
+			renderer->SetMesh(cubeMesh);
+			renderer->SetMaterial(cubeMaterial);
+
+			// Add rigid body and then colliders
+			RigidBody::Sptr physics = rightT->Add<RigidBody>(/*static by default*/);
+			physics->AddCollider(BoxCollider::Create())->SetScale(glm::vec3(0.25, 1, 1.5));
+		}
+		GameObject::Sptr rightB = scene->CreateGameObject("Right-B");
+		{
+			// Set position in the scene
+			rightB->SetPostion(glm::vec3(-7.7f, 3.68f, 0.5f));
+			// Scale down the plane
+			rightB->SetScale(glm::vec3(0.25, 1.7, 0.45f));
+
+			// Create and attach a render component
+			RenderComponent::Sptr renderer = rightB->Add<RenderComponent>();
+			renderer->SetMesh(cubeMesh);
+			renderer->SetMaterial(cubeMaterial);
+
+			// Add rigid body and then colliders
+			RigidBody::Sptr physics = rightB->Add<RigidBody>(/*static by default*/);
+			physics->AddCollider(BoxCollider::Create())->SetScale(glm::vec3(0.25, 1, 1.5));
+		}
+
+
+
+		
 		// Create a trigger volume for testing how we can detect collisions with objects!
 
 		// Create 2 goal posts with 2 triggers here
