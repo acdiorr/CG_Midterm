@@ -347,17 +347,23 @@ int main() {
 		}
 
 		// Create some lights for our scene
-		scene->Lights.resize(3);
-		scene->Lights[0].Position = glm::vec3(0.0f, 1.0f, 3.0f);
+		scene->Lights.resize(4);
+		scene->Lights[0].Position = glm::vec3(5.0f, 1.0f, 2.0f);
 		scene->Lights[0].Color = glm::vec3(0.5f, 0.0f, 0.7f);
-		scene->Lights[0].Range = 10.0f;
+		scene->Lights[0].Range = 25.0f;
 
 		scene->Lights[1].Position = glm::vec3(1.0f, 0.0f, 3.0f);
-		scene->Lights[1].Color = glm::vec3(0.2f, 0.8f, 0.1f);
+		scene->Lights[1].Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		scene->Lights[1].Range = 10.0f;
 
-		scene->Lights[2].Position = glm::vec3(0.0f, 1.0f, 3.0f);
+		scene->Lights[2].Position = glm::vec3(-5.0f, 1.0f, 2.0f);
 		scene->Lights[2].Color = glm::vec3(1.0f, 0.2f, 0.1f);
+		scene->Lights[2].Range = 25.0f;
 
+
+		scene->Lights[3].Position = glm::vec3(1.0f, 0.0f, 1.0f);
+		scene->Lights[3].Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		scene->Lights[3].Range = 10.0f;
 		// We'll create a mesh that is a simple plane that we can resize later
 		MeshResource::Sptr planeMesh = ResourceManager::CreateAsset<MeshResource>();
 		planeMesh->AddParam(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(1.0f)));
@@ -767,10 +773,18 @@ int main() {
 		{
 			player1->Get<RigidBody>()->SetVelocity(glm::vec3(-5.0f, 0.0f, 0.0f));
 		}
+		//Now you may be asking, why only reset to 0 when you press D, and not the rest? No clue, but it works with the rest
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
+		{
+			player1->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		{
 			player1->Get<RigidBody>()->SetVelocity(glm::vec3(5.0f, 0.0f, 0.0f));
 		}
+
+
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		{
 			player1->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, -5.0f, 0.0f));
@@ -800,6 +814,11 @@ int main() {
 		{
 			player2->Get<RigidBody>()->SetVelocity(glm::vec3(-5.0f, 0.0f, 0.0f));
 		}
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
+		{
+			player2->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+
 		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 		{
 			player2->Get<RigidBody>()->SetVelocity(glm::vec3(5.0f, 0.0f, 0.0f));
