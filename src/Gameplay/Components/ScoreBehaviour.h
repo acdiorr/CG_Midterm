@@ -13,7 +13,6 @@ public:
 
 	Gameplay::Material::Sptr        EnterMaterial;
 	Gameplay::Material::Sptr        ExitMaterial;
-
 	// Inherited from IComponent
 
 	virtual void OnEnteredTrigger(const std::shared_ptr<Gameplay::Physics::TriggerVolume>& trigger) override;
@@ -25,6 +24,5 @@ public:
 	MAKE_TYPENAME(ScoreBehaviour);
 
 protected:
-
 	RenderComponent::Sptr _renderer;
 };
