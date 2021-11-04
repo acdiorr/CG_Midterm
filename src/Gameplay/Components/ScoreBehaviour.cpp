@@ -13,6 +13,8 @@ ScoreBehaviour::~ScoreBehaviour() = default;
 void ScoreBehaviour::OnEnteredTrigger(const Gameplay::Physics::TriggerVolume::Sptr& trigger) {
 	if (_renderer && EnterMaterial) {
 		_renderer->SetMaterial(EnterMaterial);
+		GetGameObject()->SetPostion(glm::vec3(0.0f, 0.0f, 2.0f));
+		
 		std::cout << "Score +1";
 	}
 	LOG_INFO("Entered trigger: {}", trigger->GetGameObject()->Name);

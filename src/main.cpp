@@ -51,6 +51,7 @@
 #include "Gameplay/Components/RenderComponent.h"
 #include "Gameplay/Components/MaterialSwapBehaviour.h"
 #include "Gameplay/Components/ScoreBehaviour.h"
+#include "Gameplay/Components/TriggerVolumeEnterBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -257,6 +258,7 @@ int main() {
 	ComponentManager::RegisterType<JumpBehaviour>();
 	ComponentManager::RegisterType<MaterialSwapBehaviour>();
 	ComponentManager::RegisterType<ScoreBehaviour>();
+	ComponentManager::RegisterType<TriggerVolumeEnterBehaviour>();
 
 	// GL states, we'll enable depth testing and backface fulling
 	glEnable(GL_DEPTH_TEST);
@@ -362,7 +364,7 @@ int main() {
 		// Set up the scene's camera
 		GameObject::Sptr camera = scene->CreateGameObject("Main Camera");
 		{
-			camera->SetPostion(glm::vec3(0.0f, 0.0f, 7.0f));
+			camera->SetPostion(glm::vec3(0.0f, 0.0f, 8.0f));
 			camera->LookAt(glm::vec3(0.0f));
 
 			Camera::Sptr cam = camera->Add<Camera>();
@@ -398,12 +400,16 @@ int main() {
 			RenderComponent::Sptr renderer = puck->Add<RenderComponent>();
 			renderer->SetMesh(puckMesh);
 			renderer->SetMaterial(puckMaterial);
-
-			// Add rigid body and then colliders
-			RigidBody::Sptr physics = puck->Add<RigidBody>(RigidBodyType::Dynamic);
-			physics->AddCollider(CylinderCollider::Create())->SetRotation(glm::vec3(90.0f, 0.f, 0.f));
-
 		}
+		// Add rigid body and then colliders
+		RigidBody::Sptr _puck = puck->Add<RigidBody>(RigidBodyType::Dynamic);
+		_puck->AddCollider(CylinderCollider::Create())->SetRotation(glm::vec3(90.0f, 0.f, 0.f));
+		_puck->SetAngularDamping(100.0f);
+		_puck->SetLinearDamping(0.001f);
+
+		ScoreBehaviour::Sptr trigger = puck->Add<ScoreBehaviour>();
+		trigger->EnterMaterial = boxMaterial;
+		trigger->ExitMaterial = puckMaterial;
 
 		GameObject::Sptr paddleLeft = scene->CreateGameObject("Paddle1");
 		{
@@ -421,15 +427,20 @@ int main() {
 			// Add a dynamic rigid body to this monkey
 			RigidBody::Sptr physics = paddleLeft->Add<RigidBody>(RigidBodyType::Dynamic);
 			physics->AddCollider(CylinderCollider::Create())-> SetRotation(glm::vec3(90.0f, 0.f,0.f));
+			physics->SetAngularDamping(100.0f);
+			//physics->SetLinearDamping(1.0f);
+
 
 			// We'll add a behaviour that will interact with our trigger volumes
+			TriggerVolumeEnterBehaviour::Sptr trigger = paddleLeft->Add<TriggerVolumeEnterBehaviour>();
+			//trigger->OnTriggerVolumeEntered = scene->FindObjectByName("P1Trigger");
 			/*
 			ScoreBehaviour::Sptr triggerInteraction = paddleLeft->Add<ScoreBehaviour>();
 			triggerInteraction->EnterMaterial = boxMaterial;
 			triggerInteraction->ExitMaterial = puckMaterial;
 			*/
 		}
-		
+
 		GameObject::Sptr paddleRight = scene->CreateGameObject("Paddle2");
 		{
 			// Set position in the scene
@@ -444,6 +455,10 @@ int main() {
 			renderer->SetMesh(paddleMesh);
 			renderer->SetMaterial(purplepaddleMaterial);
 		}
+		RigidBody::Sptr physics = paddleRight->Add<RigidBody>(RigidBodyType::Dynamic);
+		physics->AddCollider(CylinderCollider::Create())->SetRotation(glm::vec3(90.0f, 0.f, 0.f));
+		physics->SetAngularDamping(100.0f);
+
 		GameObject::Sptr top = scene->CreateGameObject("Top");
 		{
 			// Set position in the scene
@@ -481,10 +496,6 @@ int main() {
 
 		}
 
-
-
-		RigidBody::Sptr physics = paddleRight->Add<RigidBody>(RigidBodyType::Dynamic);
-		physics->AddCollider(CylinderCollider::Create())->SetRotation(glm::vec3(90.0f, 0.f, 0.f));
 		// Create a trigger volume for testing how we can detect collisions with objects!
 
 		// Create 2 goal posts with 2 triggers here
@@ -502,6 +513,10 @@ int main() {
 			collider->SetPosition(glm::vec3(-12.5f, 0.0f, 0.5f));
 			volume->AddCollider(collider);
 		}
+
+
+
+
 
 		// Save the asset manifest for all the resources we just loaded
 		ResourceManager::SaveManifest("manifest.json");
@@ -627,7 +642,9 @@ int main() {
 		// Grab game objects by Name to manipulate them
 		GameObject::Sptr player1 = scene->FindObjectByName("Paddle1");
 		GameObject::Sptr player2 = scene->FindObjectByName("Paddle2");
-		//GameObject* monkeyTest = monkey->GetPosition();
+		GameObject::Sptr puck = scene->FindObjectByName("Puck");
+		GameObject::Sptr trigger1 = scene->FindObjectByName("player1Goal");
+		GameObject::Sptr trigger2 = scene->FindObjectByName("player2Goal");
 
 		// Player 1 Movement
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
@@ -647,12 +664,38 @@ int main() {
 			player1->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, 5.0f, 0.0f));
 		}
 
+		/*
+		if (puck->Get<RigidBody>()->OnEnteredTrigger(trigger1->GetPosition)
+		{
+			puck->SetPostion(glm::vec3(0.0f, 0.0f, 2.0f));
+		}
+		*/
+		//if (trigger1->Get<TriggerVolume>()->OnTriggerVolumeEntered(puck->Get<RigidBody>()))
+		/*
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 		// Player 2 Movement
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		{
 			player2->Get<RigidBody>()->SetVelocity(glm::vec3(xpos, ypos, 0.0f));
+		}
+		*/
+
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		{
+			player2->Get<RigidBody>()->SetVelocity(glm::vec3(-5.0f, 0.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		{
+			player2->Get<RigidBody>()->SetVelocity(glm::vec3(5.0f, 0.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		{
+			player2->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, -5.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		{
+			player2->Get<RigidBody>()->SetVelocity(glm::vec3(0.0f, 5.0f, 0.0f));
 		}
 
 		dt *= playbackSpeed;
